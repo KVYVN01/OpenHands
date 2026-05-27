@@ -190,3 +190,66 @@ export const OSS_NAV_ITEMS: SettingsNavItem[] = [
     text: "SETTINGS$NAV_SECRETS",
   },
 ];
+
+export const DOSTUP_NAV_ITEMS: SettingsNavItem[] = [
+  {
+    icon: <RobotIcon width={22} height={22} />,
+    to: "/settings/agent",
+    text: "SETTINGS$AGENT",
+  },
+  {
+    icon: <CircuitIcon width={22} height={22} />,
+    to: "/settings",
+    text: "SETTINGS$NAV_LLM",
+    disabledByAcp: true,
+  },
+  {
+    icon: <MemoryIcon width={22} height={22} />,
+    to: "/settings/condenser",
+    text: "SETTINGS$NAV_CONDENSER",
+    disabledByAcp: true,
+  },
+  {
+    icon: <LockIcon width={22} height={22} />,
+    to: "/settings/verification",
+    text: "SETTINGS$NAV_VERIFICATION",
+  },
+  {
+    icon: <ServerProcessIcon width={22} height={22} />,
+    to: "/settings/mcp",
+    text: "SETTINGS$NAV_MCP",
+    disabledByAcp: true,
+  },
+  {
+    icon: <LightbulbIcon width={22} height={22} />,
+    to: "/settings/skills",
+    text: "SETTINGS$NAV_SKILLS",
+  },
+  {
+    icon: <PuzzlePieceIcon width={22} height={22} />,
+    to: "/settings/integrations",
+    text: "SETTINGS$NAV_INTEGRATIONS",
+  },
+  {
+    icon: <SettingsGearIcon width={22} height={22} />,
+    to: "/settings/app",
+    text: "SETTINGS$NAV_APPLICATION",
+  },
+  {
+    icon: <KeyIcon width={22} height={22} />,
+    to: "/settings/secrets",
+    text: "SETTINGS$NAV_SECRETS",
+  },
+  {
+    icon: <KeyIcon width={22} height={22} />,
+    to: "/settings/api-keys",
+    text: "SETTINGS$NAV_API_KEYS",
+    section: "api-keys",
+  },
+  {
+    icon: <CreditCardIcon width={22} height={22} />,
+    to: "/settings/billing",
+    text: "SETTINGS$NAV_BILLING",
+    section: "billing",
+  },
+];
