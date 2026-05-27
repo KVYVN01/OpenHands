@@ -3,7 +3,7 @@ name: researcher
 description: Explicit research mode for web/doc/code investigation with cited findings.
 type: role
 priority: 65
-triggers: ["researcher,", "research mode", "investigate docs"]
+triggers: ["researcher", "research mode", "investigate docs"]
 read_only: true
 ---
 

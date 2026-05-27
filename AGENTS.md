@@ -284,6 +284,70 @@ Each integration follows a consistent pattern with service classes, storage mode
 
 ## Template for Github Pull Request
 
+
+## oh-pro Skill Pipeline
+
+The oh-pro skills form a connected pipeline across the agent lifecycle. Each skill has a `type`, `priority`, and `triggers` in its YAML frontmatter.
+
+### Pipeline Stages
+
+```
+PLAN ──────────────────────────────────────────────────────────────► DONE
+ │                                                                     ▲
+ ├─ plan-orchestrator (process, p92)                                   │
+ │   PLAN.md before non-trivial tasks                                  │
+ │                                                                     │
+ ├─ architect (engineering, p78) ──────────────────────────────────────┤
+ │   Architecture decisions before implementation                      │
+ │                                                                     │
+ ├─► IMPLEMENT ────────────────────────────────────────────────────────┤
+ │   │                                                                 │
+ │   ├─ python-pro (engineering, p76)    ├─ data-engineer (domain,p77) │
+ │   ├─ ml-engineer (domain, p89)        ├─ devops-pro (domain, p81)   │
+ │   ├─ sre-debugger (domain, p79)       ├─ product-manager (role,p62) │
+ │   │                                                                 │
+ │   ├─► ENFORCE ──────────────────────────────────────────────────────┤
+ │   │   │                                                             │
+ │   │   ├─ write-discipline (process, p95) — claim → write → verify  │
+ │   │   ├─ tdd-enforcer (process, p88) — test → fix → refactor       │
+ │   │   ├─ spec-first (process, p86) — no silent scope changes       │
+ │   │   └─ refactor-surgeon (engineering, p70) — before/after tests  │
+ │   │                                                                 │
+ │   └─► REVIEW ───────────────────────────────────────────────────────┤
+ │       │                                                             │
+ │       ├─ code-reviewer (engineering, p74) — correctness, scope      │
+ │       ├─ security-auditor (engineering, p90) — auth, secrets, vulns │
+ │       └─ debugger (engineering, p72) — root cause, one var at time │
+ │                                                                     │
+ ├─► SESSION LIFECYCLE ────────────────────────────────────────────────┤
+ │   │                                                                 │
+ │   ├─ context-keeper (session, p84) — periodic context summaries     │
+ │   ├─ drift-detector (session, p82) — snapshot → detect drift        │
+ │   └─ memory-compactor (session, p80) — compact worklogs             │
+ │                                                                     │
+ └─► SUPPORT ROLES ────────────────────────────────────────────────────┤
+     │                                                                 │
+     ├─ researcher (role, p65) — web/doc investigation, cited findings │
+     └─ creative-writer (role, p50) — tone, copy, documentation        │
+```
+
+### Type Taxonomy
+
+| Type | Count | Skills | Purpose |
+|------|-------|--------|---------|
+| `engineering` | 6 | architect, debugger, python-pro, refactor-surgeon, code-reviewer, security-auditor | Code production and review |
+| `domain` | 4 | data-engineer, devops-pro, ml-engineer, sre-debugger | Domain-specific methodology |
+| `session` | 3 | context-keeper, drift-detector, memory-compactor | Session lifecycle management |
+| `process` | 4 | plan-orchestrator, write-discipline, tdd-enforcer, spec-first | Workflow enforcement |
+| `role` | 3 | creative-writer, product-manager, researcher | Persona-based assistance |
+
+### Key Interactions
+- **write-discipline + drift-detector**: write-discipline tracks every file write; drift-detector periodically snapshots and detects silent changes
+- **write-discipline + memory-compactor**: memory-compactor reads WRITE_LOG.md for worklog construction
+- **plan-orchestrator + all engineering skills**: each PLAN.md step must be bound to a concrete skill
+- **spec-first + plan-orchestrator**: spec-first blocks scope creep; plan-orchestrator captures scope changes in Decisions Log
+- **tdd-enforcer + debugger**: tdd-enforcer requires tests before fixes; debugger isolates one variable at a time
+
 If you are starting a pull request (PR), please follow the template in `.github/pull_request_template.md`.
 - The PR template now starts with a `HUMAN:` section, the human-tested checkbox, and an `AGENT:` section.
 - `.github/workflows/pr-readiness-confirm.yml` checks non-draft PRs for non-empty text between `HUMAN:` and the human-tested checkbox; if present it adds a 👍 reaction, and if absent it posts a reminder comment.

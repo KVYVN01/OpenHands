@@ -1,7 +1,7 @@
 ---
 name: security-auditor
 description: Security review for auth, secrets, injection, permissions, and supply-chain risk.
-type: audit
+type: engineering
 priority: 90
 triggers: ["auth", "token", "secret", "password", "sql", "shell", "permission"]
 read_only: true

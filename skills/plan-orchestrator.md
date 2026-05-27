@@ -1,73 +1,73 @@
 ---
 name: plan-orchestrator
-description: Усиливает встроенный planning agent OpenHands. Заставляет составлять структурированный PLAN.md перед нетривиальными задачами, привязывать каждый шаг к skill'у, фиксировать риски и rollback-план.
-type: always
+description: Amplifies the built-in OpenHands planning agent. Enforces a structured PLAN.md before non-trivial tasks, binds each step to a skill, captures risks and rollback plans. Syncs with Task List UI.
+type: process
 priority: 92
-triggers: []
+triggers: ["plan", "multi-file", "multi-module", "migration", "refactor", "architecture"]
 read_only: false
 ---
 
 # Plan Orchestrator
 
-Этот skill работает в паре с встроенным OH planning agent и `Task List` UI (1.5+).
+Works in tandem with the built-in OpenHands planning agent and `Task List` UI.
 
-## Когда план обязателен
-- задача требует > 3 файлов изменений;
-- задача затрагивает несколько модулей;
-- задача требует исследования перед кодом;
-- задача связана с миграцией, рефакторингом, security-критичным кодом.
+## When a plan is required
+- Task touches > 3 files;
+- Task spans multiple modules;
+- Task requires research before coding;
+- Task involves migration, refactoring, or security-critical code.
 
-## Когда план не нужен
-- одна правка в одном файле, очевидная;
-- ответ на вопрос без изменений в коде;
-- работа в режиме researcher (там свой формат).
+## When a plan is NOT needed
+- Single-file, obvious fix;
+- Answering a question with no code changes;
+- Working in researcher mode (has its own format).
 
-## Формат PLAN.md (создаётся/обновляется в корне проекта)
+## PLAN.md format (created/updated in project root)
 
 ```markdown
-# Plan: 
+# Plan: <short title>
 
-**Created:** 
+**Created:** <ISO date>
 **Status:** draft | active | done | abandoned
-**Owner-skill:** 
+**Owner-skill:** <skill name>
 
 ## Goal
-
+<1-2 sentences>
 
 ## Acceptance criteria
-- [ ] 
-- [ ] 
+- [ ] <criterion 1>
+- [ ] <criterion 2>
 
 ## Steps
-1. **** — skill: `` — risk: low/med/high
-   - input: 
-   - output: 
-   - rollback: 
+1. **<step name>** — skill: `<skill>` — risk: low/med/high
+   - input: <what this step needs>
+   - output: <what this step produces>
+   - rollback: <how to undo>
 2. ...
 
 ## Risks
--  → митигация 
+- <risk description> → mitigation: <how to handle>
 
 ## Out of scope
-- 
+- <explicitly excluded>
 
 ## Decisions log
-- : 
+- <timestamp>: <decision>
 ```
 
-## Правила работы
+## Operating rules
 
-1. **Перед любой задачей категории "план обязателен"** — создай/обнови PLAN.md, покажи пользователю, дождись apply/правок.
-2. **Привязывай каждый шаг к конкретному skill** (architect, ml-engineer, refactor-surgeon, etc). Если skill не подходит — отметь "manual" и опиши действия явно.
-3. **Risk-аннотация:** high-risk шаги требуют явного подтверждения перед началом.
-4. **Rollback** обязателен для каждого шага меняющего файлы. "Cannot rollback" — отдельная пометка.
-5. **Decisions log append-only.** Если решение меняется — новая запись, не переписывание старой.
-6. **Synchroniзация с Task List UI:** каждый Step в PLAN.md соответствует одной задаче в Task List.
-7. **При завершении** перенеси PLAN.md в `plans/done/<date>-<name>.md` для истории.
+1. **Before any "plan required" task** — create/update PLAN.md, show to user, wait for approval.
+2. **Bind every step to a concrete skill** (architect, ml-engineer, refactor-surgeon, etc.). If no skill fits, mark as "manual" and describe actions explicitly.
+3. **Risk annotation:** high-risk steps require explicit confirmation before execution.
+4. **Rollback** is mandatory for every file-modifying step. "Cannot rollback" is a valid annotation — state it explicitly.
+5. **Decisions log is append-only.** If a decision changes — new entry, never overwrite old.
+6. **Sync with Task List UI:** each Step in PLAN.md maps to one task in Task List.
+7. **On completion** move PLAN.md to `plans/done/<date>-<name>.md` for history.
 
-## Анти-паттерны (не делать)
+## Anti-patterns (avoid)
 
-- План на 1-2 пункта типа "сделай X, проверь" — лучше без плана.
-- 20+ шагов в одном плане — разбей на под-планы.
-- Шаги без acceptance criteria — невозможно проверить done.
-- Игнорировать risk-аннотации — high-risk без подтверждения = stop.
+- 1-2 line plan like "do X, check Y" — skip the plan.
+- 20+ steps in one plan — split into sub-plans.
+- Steps without acceptance criteria — impossible to verify done.
+- Ignoring risk annotations — high-risk without confirmation = stop.

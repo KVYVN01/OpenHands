@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Review changes for correctness, maintainability, testability, and scope control.
-type: review
+type: engineering
 priority: 74
 triggers: ["review", "diff", "pull request", "quality"]
 read_only: true
