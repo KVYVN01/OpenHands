@@ -206,9 +206,10 @@ if _is_dostup:
 
 # Middleware and static file setup (merged from listen.py)
 if os.getenv('SERVE_FRONTEND', 'true').lower() == 'true':
-    # Try standard build/ first, then build/client/ (Windows EPERM fallback)
+    # Prefer build/client/ (fresh React Router SPA output).
+    # Fall back to build/ only if client/ has no index.html.
     build_dir = None
-    for candidate in ('./frontend/build', './frontend/build/client'):
+    for candidate in ('./frontend/build/client', './frontend/build'):
         if os.path.isdir(candidate) and os.path.isfile(
             os.path.join(candidate, 'index.html')
         ):
