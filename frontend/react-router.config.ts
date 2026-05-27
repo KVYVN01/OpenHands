@@ -17,12 +17,13 @@ const unpackClientDirectory = async () => {
 
   const files = await fs.promises.readdir(clientDir);
   await Promise.all(
-    files.map((file) =>
-      fs.promises.rename(
-        path.resolve(clientDir, file),
-        path.resolve(buildDir, file),
-      ),
-    ),
+    files.map(async (file) => {
+      const src = path.resolve(clientDir, file);
+      const dst = path.resolve(buildDir, file);
+      // Remove stale target first (Windows EPERM workaround)
+      try { await fs.promises.rm(dst, { recursive: true, force: true }); } catch {}
+      await fs.promises.rename(src, dst);
+    }),
   );
 
   await fs.promises.rmdir(clientDir);
