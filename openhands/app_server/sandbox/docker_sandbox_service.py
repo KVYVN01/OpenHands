@@ -579,7 +579,38 @@ class DockerSandboxServiceInjector(SandboxServiceInjector):
         default=5,
         description='Maximum number of sandboxes allowed to run simultaneously',
     )
-    mounts: list[VolumeMount] = Field(default_factory=list)
+    @staticmethod
+    def _default_mounts() -> list[VolumeMount]:
+        """Auto-mount oh-pro skills from repo into sandbox ~/.openhands/skills/."""
+        from pathlib import Path as _Path
+
+        mounts: list[VolumeMount] = []
+        # Source repo skills/ — resolve from openhands package location
+        try:
+            import openhands
+
+            repo_root = _Path(openhands.__file__).resolve().parent.parent
+            skills_src = repo_root / 'skills'
+        except Exception:
+            skills_src = None
+
+        # Fallback: look for skills/ relative to CWD (pip install -e)
+        if not skills_src or not skills_src.is_dir():
+            cwd_skills = _Path.cwd() / 'skills'
+            if cwd_skills.is_dir():
+                skills_src = cwd_skills
+
+        if skills_src and skills_src.is_dir():
+            mounts.append(
+                VolumeMount(
+                    host_path=str(skills_src),
+                    container_path='/home/openhands/.openhands/skills',
+                    mode='ro',
+                )
+            )
+        return mounts
+
+    mounts: list[VolumeMount] = Field(default_factory=_default_mounts)
     exposed_ports: list[ExposedPort] = Field(
         default_factory=lambda: [
             ExposedPort(
