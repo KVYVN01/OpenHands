@@ -30,9 +30,9 @@ services:
       - ${WORKSPACE_BASE:-$PWD/workspace}:/opt/workspace_base
       - ./skills:/opt/oh-pro/skills:ro
       - ./skills:/home/openhands/.agents/skills:ro
-      - ./scripts:/opt/oh-pro/scripts:ro
-      - ./hooks:/opt/oh-pro/hooks:ro
-      - ./templates:/opt/oh-pro/templates:ro
+      - ./oh-pro/scripts:/opt/oh-pro/scripts:ro
+      - ./oh-pro/hooks:/opt/oh-pro/hooks:ro
+      - ./oh-pro/templates:/opt/oh-pro/templates:ro
     mem_limit: 8g
     cpus: 4
     healthcheck:
@@ -52,6 +52,6 @@ services:
       - MEMORY_KEEP_RECENT=${MEMORY_KEEP_RECENT:-50}
     volumes:
       - ~/.openhands-state:/.openhands-state
-      - ./scripts:/opt/oh-pro/scripts:ro
+      - ./oh-pro/scripts:/opt/oh-pro/scripts:ro
     entrypoint: ["/bin/sh", "-c"]
     command: "while true; do /opt/oh-pro/scripts/compact-worklog.sh || true; sleep 300; done"

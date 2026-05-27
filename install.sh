@@ -36,10 +36,10 @@ fi
 
 run "mkdir -p '$INSTALL_DIR' '$STATE_DIR/swd'"
 run "tar --exclude='.git' --exclude='refs' --exclude='test-results' --exclude='.env' -C '$SCRIPT_DIR' -cf - . | tar -C '$INSTALL_DIR' -xf -"
-run "chmod +x '$INSTALL_DIR/install.sh' '$INSTALL_DIR/uninstall.sh' '$INSTALL_DIR/scripts/'*.sh '$INSTALL_DIR/hooks/'*.sh '$INSTALL_DIR/tests/'**/*.sh"
+run "chmod +x '$INSTALL_DIR/install.sh' '$INSTALL_DIR/uninstall.sh' '$INSTALL_DIR/oh-pro/scripts/'*.sh '$INSTALL_DIR/oh-pro/hooks/'*.sh '$INSTALL_DIR/oh-pro/tests/'**/*.sh"
 
 if [[ ! -f "$INSTALL_DIR/.env" ]]; then
-  run "cp '$INSTALL_DIR/.env.example' '$INSTALL_DIR/.env'"
+  run "cp '$INSTALL_DIR/.env.pro.example' '$INSTALL_DIR/.env'"
   say "Created .env from example. EDIT IT and set ANTHROPIC_API_KEY before starting."
 fi
 
@@ -48,7 +48,7 @@ run "cd '$INSTALL_DIR' && docker compose build"
 
 # Setup skills for non-Docker environments
 say "Setting up skills..."
-run "bash '$INSTALL_DIR/scripts/setup-skills.sh'"
+run "bash '$INSTALL_DIR/oh-pro/scripts/setup-skills.sh'"
 
 cat <<EOF2
 

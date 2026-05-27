@@ -3,7 +3,11 @@
 # Works in both Docker (mounted) and non-Docker (copied/symlinked) environments.
 set -euo pipefail
 
-SKILLS_SRC="${OH_PRO_SKILLS_SRC:-$(dirname "$0")/../skills}"
+# Resolve to repo root skills/ directory.
+# Works both in-repo (oh-pro/scripts/ -> ../../skills/)
+# and after install.sh (when copied to $OH_PRO_HOME with same layout).
+_script_dir="$(cd "$(dirname "$0")" && pwd)"
+SKILLS_SRC="${OH_PRO_SKILLS_SRC:-$_script_dir/../../skills}"
 SKILLS_DST="${OH_PRO_SKILLS_DST:-$HOME/.agents/skills}"
 
 say() { echo "[oh-pro:setup-skills] $*"; }
