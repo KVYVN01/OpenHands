@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid -- placeholder anchors after URL scrub for DOSTUP_CRS */
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 
@@ -13,7 +14,7 @@ export function TOSCheckbox({ onChange }: TOSCheckboxProps) {
       <span>
         {t(I18nKey.TOS$ACCEPT)}{" "}
         <a
-          href="https://www.all-hands.dev/tos"
+          href="#"
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 text-blue-500 hover:text-blue-700"

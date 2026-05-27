@@ -173,6 +173,27 @@ def resolve_provider_llm_base_url(
     return base_url
 
 
+def _get_default_app_mode() -> AppMode:
+    """Resolve the active :class:`AppMode`.
+
+    Order of precedence:
+      1. ``OH_APP_MODE`` — explicit override (``oss`` / ``saas`` / ``dostup``).
+      2. ``OPENHANDS_CONFIG_CLS`` pointing at the bundled DOSTUP server
+         config — convenient single switch for multi-user deployments.
+      3. Default to :data:`AppMode.OPENHANDS`.
+    """
+    explicit = os.getenv('OH_APP_MODE')
+    if explicit:
+        try:
+            return AppMode(explicit)
+        except ValueError:
+            pass
+    config_cls = os.getenv('OPENHANDS_CONFIG_CLS', '')
+    if 'dostup' in config_cls.lower():
+        return AppMode.DOSTUP
+    return AppMode.OPENHANDS
+
+
 def _get_default_lifespan():
     # Check legacy parameters for saas mode. If we are in SAAS mode use
     # SaasAppLifespanService to initialize PostHog analytics
@@ -233,7 +254,7 @@ class AppServerConfig(OpenHandsModel):
     )
     # Services
     lifespan: AppLifespanService | None = Field(default_factory=_get_default_lifespan)
-    app_mode: AppMode = AppMode.OPENHANDS
+    app_mode: AppMode = Field(default_factory=lambda: _get_default_app_mode())
     web_client: WebClientConfigInjector = Field(
         default_factory=DefaultWebClientConfigInjector
     )

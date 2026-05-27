@@ -57,8 +57,13 @@ class ReoService {
         return;
       }
 
+      // Third-party analytics is disabled for the DOSTUP_CRS deployment;
+      // we no longer load reo.dev from the public CDN.
+      resolve();
+      return;
+      // eslint-disable-next-line no-unreachable
       const script = document.createElement("script");
-      script.src = `https://static.reo.dev/${REO_CLIENT_ID}/reo.js`;
+      script.src = `#`;
       script.defer = true;
 
       script.onload = () => {

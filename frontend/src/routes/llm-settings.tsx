@@ -54,17 +54,8 @@ const getSchemaFieldDefaultValue = (
     .flatMap((section) => section.fields)
     .find((field) => field.key === fieldKey)?.default ?? null;
 
-const KNOWN_PROVIDER_DEFAULT_BASE_URLS: Partial<Record<string, Set<string>>> = {
-  openai: new Set(["https://api.openai.com", "https://api.openai.com/v1"]),
-  openhands: new Set([
-    "https://llm-proxy.app.all-hands.dev",
-    "https://llm-proxy.app.all-hands.dev/v1",
-  ]),
-  litellm_proxy: new Set([
-    "https://llm-proxy.app.all-hands.dev",
-    "https://llm-proxy.app.all-hands.dev/v1",
-  ]),
-};
+const KNOWN_PROVIDER_DEFAULT_BASE_URLS: Partial<Record<string, Set<string>>> =
+  {};
 
 const normalizeBaseUrl = (baseUrl: string) => {
   try {
@@ -262,7 +253,7 @@ export function LlmSettingsScreen({
               testId={helpTestId}
               text={t(I18nKey.SETTINGS$DONT_KNOW_API_KEY)}
               linkText={t(I18nKey.SETTINGS$CLICK_FOR_INSTRUCTIONS)}
-              href="https://docs.openhands.dev/usage/local-setup#getting-an-api-key"
+              href="#"
             />
           </>
         );
@@ -347,7 +338,7 @@ export function LlmSettingsScreen({
                 type="text"
                 className="w-full"
                 value={baseUrlValue}
-                placeholder="https://api.openai.com"
+                placeholder="base url"
                 onChange={(value) => onChange("llm.base_url", value)}
                 isDisabled={isDisabled}
               />

@@ -16,12 +16,19 @@ export interface CreateApiKeyResponse {
   created_at: string;
 }
 
+/** SaaS uses ``/api/keys``; DOSTUP uses ``/api/v1/bot/keys``. */
+let apiKeysBasePath = "/api/keys";
+
 class ApiKeysClient {
+  static setBasePath(path: string) {
+    apiKeysBasePath = path;
+  }
+
   /**
    * Get all API keys for the current user
    */
   static async getApiKeys(): Promise<ApiKey[]> {
-    const { data } = await openHands.get<unknown>("/api/keys");
+    const { data } = await openHands.get<unknown>(apiKeysBasePath);
     // Ensure we always return an array, even if the API returns something else
     return Array.isArray(data) ? (data as ApiKey[]) : [];
   }
@@ -31,9 +38,12 @@ class ApiKeysClient {
    * @param name - A descriptive name for the API key
    */
   static async createApiKey(name: string): Promise<CreateApiKeyResponse> {
-    const { data } = await openHands.post<CreateApiKeyResponse>("/api/keys", {
-      name,
-    });
+    const { data } = await openHands.post<CreateApiKeyResponse>(
+      apiKeysBasePath,
+      {
+        name,
+      },
+    );
     return data;
   }
 
@@ -42,7 +52,7 @@ class ApiKeysClient {
    * @param id - The ID of the API key to delete
    */
   static async deleteApiKey(id: string): Promise<void> {
-    await openHands.delete(`/api/keys/${id}`);
+    await openHands.delete(`${apiKeysBasePath}/${id}`);
   }
 }
 

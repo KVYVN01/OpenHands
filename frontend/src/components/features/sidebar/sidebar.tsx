@@ -48,7 +48,7 @@ export function Sidebar() {
         "Something went wrong while fetching settings. Please reload the page.",
       );
     } else if (
-      config?.app_mode === "oss" &&
+      (config?.app_mode === "oss" || config?.app_mode === "dostup") &&
       settingsError?.status === 404 &&
       !config?.feature_flags?.hide_llm_settings
     ) {

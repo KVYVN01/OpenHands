@@ -163,7 +163,7 @@ export const getFileExtension = (fileName: string): string => {
 
 export const shouldUseInstallationRepos = (
   provider: Provider,
-  app_mode: "saas" | "oss" | undefined,
+  app_mode: "saas" | "oss" | "dostup" | undefined,
 ) => {
   if (!provider) return false;
 

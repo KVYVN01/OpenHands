@@ -211,13 +211,13 @@ export default function MainApp() {
   const isLoading = config.isLoading || isAuthLoading;
 
   // Only decide to redirect AFTER loading completes
+  const appMode = config.data?.app_mode;
   const shouldRedirectToLogin =
     !isLoading &&
     !isAuthed &&
     !isAuthError &&
     !isOnIntermediatePage &&
-    config.data?.app_mode === "saas" &&
-    !loginMethodExists;
+    (appMode === "saas" ? !loginMethodExists : appMode === "dostup");
 
   React.useEffect(() => {
     if (shouldRedirectToLogin) {
@@ -248,8 +248,9 @@ export default function MainApp() {
     !isAuthError &&
     !isFetchingAuth &&
     !isOnIntermediatePage &&
-    config.data?.app_mode === "saas" &&
-    loginMethodExists;
+    (config.data?.app_mode === "saas"
+      ? loginMethodExists
+      : config.data?.app_mode === "dostup");
 
   return (
     <div

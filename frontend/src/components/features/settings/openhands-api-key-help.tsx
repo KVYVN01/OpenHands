@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid -- placeholder anchors after URL scrub for DOSTUP_CRS */
 import { useTranslation } from "react-i18next";
 import { HelpLink } from "#/ui/help-link";
 import { I18nKey } from "#/i18n/declaration";
@@ -16,13 +17,13 @@ export function OpenHandsApiKeyHelp({ testId }: OpenHandsApiKeyHelpProps) {
         testId={testId}
         text={t(I18nKey.SETTINGS$OPENHANDS_API_KEY_HELP_TEXT)}
         linkText={t(I18nKey.SETTINGS$NAV_API_KEYS)}
-        href="https://app.all-hands.dev/settings/api-keys"
+        href="#"
         suffix={` ${t(I18nKey.SETTINGS$OPENHANDS_API_KEY_HELP_SUFFIX)}`}
       />
       <Typography.Paragraph className="text-xs">
         {t(I18nKey.SETTINGS$LLM_BILLING_INFO)}{" "}
         <a
-          href="https://docs.openhands.dev/usage/llms/openhands-llms"
+          href="#"
           rel="noreferrer noopener"
           target="_blank"
           className="underline underline-offset-2"

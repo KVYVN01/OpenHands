@@ -13,7 +13,11 @@ import {
 } from "#/hooks/query/query-keys";
 import { Organization } from "#/types/org";
 import { Typography } from "#/ui/typography";
-import { SAAS_NAV_ITEMS, OSS_NAV_ITEMS } from "#/constants/settings-nav";
+import {
+  SAAS_NAV_ITEMS,
+  OSS_NAV_ITEMS,
+  DOSTUP_NAV_ITEMS,
+} from "#/constants/settings-nav";
 import { useSettingsNavItems } from "#/hooks/use-settings-nav-items";
 import { getSettingsQueryFn } from "#/hooks/query/use-settings";
 import { getActiveOrganizationUser } from "#/utils/org/permission-checks";
@@ -30,16 +34,17 @@ import { useMe } from "#/hooks/query/use-me";
 import { OrgWideSettingsBadge } from "#/components/features/settings/org-wide-settings-badge";
 
 const SAAS_ONLY_PATHS = [
-  "/settings/user",
   "/settings/billing",
   "/settings/credits",
-  "/settings/api-keys",
   "/settings/team",
   "/settings/org",
   "/settings/org-defaults",
   "/settings/org-defaults/condenser",
   "/settings/org-defaults/verification",
+  "/settings/org-members",
 ];
+
+const SAAS_OR_DOSTUP_PATHS = ["/settings/user", "/settings/api-keys"];
 
 const ORG_WIDE_BADGE_PATHS = new Set<string>([
   "/settings/org-defaults",
@@ -59,10 +64,14 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
   });
 
   const isSaas = config?.app_mode === "saas";
+  const isDostup = config?.app_mode === "dostup";
   const featureFlags = config?.feature_flags;
 
-  // Step 2: Check SAAS_ONLY_PATHS for OSS mode (no user data required)
+  // Step 2: Check restricted paths based on app mode
   if (!isSaas && SAAS_ONLY_PATHS.includes(pathname)) {
+    return redirect("/settings");
+  }
+  if (!isSaas && !isDostup && SAAS_OR_DOSTUP_PATHS.includes(pathname)) {
     return redirect("/settings");
   }
 
@@ -91,7 +100,9 @@ export const clientLoader = async ({ request }: Route.ClientLoaderArgs) => {
   // we fall through and let the page render — same behaviour the
   // previous hook-based guard had.
   if (featureFlags?.enable_acp) {
-    const navItems = isSaas ? SAAS_NAV_ITEMS : OSS_NAV_ITEMS;
+    let navItems = OSS_NAV_ITEMS;
+    if (isSaas) navItems = SAAS_NAV_ITEMS;
+    else if (isDostup) navItems = DOSTUP_NAV_ITEMS;
     const currentItem = navItems.find((item) => item.to === pathname);
     if (currentItem?.disabledByAcp) {
       try {

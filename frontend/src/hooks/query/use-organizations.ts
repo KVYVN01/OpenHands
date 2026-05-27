@@ -7,14 +7,14 @@ export const useOrganizations = () => {
   const { data: userIsAuthenticated } = useIsAuthed();
   const { data: config } = useConfig();
 
-  // Organizations are a SaaS-only feature - disable in OSS mode
-  const isOssMode = config?.app_mode === "oss";
+  // Organizations are a SaaS-only feature - disable in OSS and DOSTUP modes
+  const isSaas = config?.app_mode === "saas";
 
   return useQuery({
     queryKey: ["organizations"],
     queryFn: organizationService.getOrganizations,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    enabled: !!userIsAuthenticated && !isOssMode,
+    enabled: !!userIsAuthenticated && isSaas,
     select: (data) => ({
       // Sort organizations with personal workspace first, then alphabetically by name
       organizations: [...data.items].sort((a, b) => {

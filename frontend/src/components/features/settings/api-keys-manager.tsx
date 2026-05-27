@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid -- placeholder anchors after URL scrub for DOSTUP_CRS */
 import React, { useState } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -307,7 +308,7 @@ export function ApiKeysManager() {
             components={{
               a: (
                 <a
-                  href="https://docs.all-hands.dev/usage/cloud/cloud-api"
+                  href="#"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-400 hover:underline"

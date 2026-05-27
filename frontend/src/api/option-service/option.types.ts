@@ -40,7 +40,7 @@ export interface ACPProviderConfig {
 }
 
 export interface WebClientConfig {
-  app_mode: "saas" | "oss";
+  app_mode: "saas" | "oss" | "dostup";
   posthog_client_key: string | null;
   feature_flags: WebClientFeatureFlags;
   providers_configured: Provider[];
@@ -58,10 +58,4 @@ export interface WebClientConfig {
   /** Jira DC host when DC OAuth is configured; used to pre-fill + lock the
    *  configure form's host field. Null/absent in email-match mode. */
   jira_dc_oauth_host?: string | null;
-  /** True when Jira DC service-account credentials are managed by OHE/KOTS. */
-  jira_dc_service_account_managed?: boolean;
-  /** Non-secret service-account email when managed by OHE/KOTS. */
-  jira_dc_service_account_email?: string | null;
-  /** Non-secret Jira DC service-account env config error, if any. */
-  jira_dc_service_account_config_error?: string | null;
 }

@@ -22,7 +22,7 @@ export const useShouldShowUserFeatures = (): boolean => {
       return providers.length > 0;
     }
 
-    // In non-OSS modes (saas), always show user features when authenticated
+    // In DOSTUP and SaaS modes, always show user features when authenticated
     return true;
   }, [config?.app_mode, isAuthed, providers.length]);
 };
