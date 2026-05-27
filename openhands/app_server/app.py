@@ -206,9 +206,17 @@ if _is_dostup:
 
 # Middleware and static file setup (merged from listen.py)
 if os.getenv('SERVE_FRONTEND', 'true').lower() == 'true':
-    if os.path.isdir('./frontend/build'):
+    # Try standard build/ first, then build/client/ (Windows EPERM fallback)
+    build_dir = None
+    for candidate in ('./frontend/build', './frontend/build/client'):
+        if os.path.isdir(candidate) and os.path.isfile(
+            os.path.join(candidate, 'index.html')
+        ):
+            build_dir = candidate
+            break
+    if build_dir:
         app.mount(
-            '/', SPAStaticFiles(directory='./frontend/build', html=True), name='dist'
+            '/', SPAStaticFiles(directory=build_dir, html=True), name='dist'
         )
 
 app.add_middleware(LocalhostCORSMiddleware)
