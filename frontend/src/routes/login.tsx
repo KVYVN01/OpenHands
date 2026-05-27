@@ -6,7 +6,6 @@ import { useGitHubAuthUrl } from "#/hooks/use-github-auth-url";
 import { useEmailVerification } from "#/hooks/use-email-verification";
 import { useInvitation } from "#/hooks/use-invitation";
 import { LoginContent } from "#/components/features/auth/login-content";
-import { DostupLoginContent } from "#/components/features/auth/dostup-login-content";
 import { EmailVerificationModal } from "#/components/features/waitlist/email-verification-modal";
 import { RequestSubmittedModal } from "#/components/features/onboarding/request-submitted-modal";
 
@@ -49,7 +48,7 @@ export default function LoginPage() {
     navigate(location.pathname, { replace: true, state: {} });
   };
 
-  // OSS deployments don't need a login flow — bounce to home.
+  // Redirect OSS mode users to home
   React.useEffect(() => {
     if (!config.isLoading && config.data?.app_mode === "oss") {
       navigate("/", { replace: true });
@@ -83,32 +82,26 @@ export default function LoginPage() {
     return null;
   }
 
-  const appMode = config.data?.app_mode;
-
   return (
     <>
       <main
         className="min-h-screen flex items-center justify-center bg-base p-4"
         data-testid="login-page"
       >
-        {appMode === "dostup" ? (
-          <DostupLoginContent returnTo={returnTo} />
-        ) : (
-          <LoginContent
-            githubAuthUrl={gitHubAuthUrl}
-            appMode={appMode}
-            authUrl={config.data?.auth_url}
-            providersConfigured={config.data?.providers_configured}
-            emailVerified={emailVerified}
-            hasDuplicatedEmail={hasDuplicatedEmail}
-            recaptchaBlocked={recaptchaBlocked}
-            hasInvitation={hasInvitation}
-            buildOAuthStateData={buildOAuthStateData}
-          />
-        )}
+        <LoginContent
+          githubAuthUrl={gitHubAuthUrl}
+          appMode={config.data?.app_mode}
+          authUrl={config.data?.auth_url}
+          providersConfigured={config.data?.providers_configured}
+          emailVerified={emailVerified}
+          hasDuplicatedEmail={hasDuplicatedEmail}
+          recaptchaBlocked={recaptchaBlocked}
+          hasInvitation={hasInvitation}
+          buildOAuthStateData={buildOAuthStateData}
+        />
       </main>
 
-      {emailVerificationModalOpen && appMode !== "dostup" && (
+      {emailVerificationModalOpen && (
         <EmailVerificationModal
           onClose={() => {
             setEmailVerificationModalOpen(false);
@@ -118,7 +111,7 @@ export default function LoginPage() {
         />
       )}
 
-      {showRequestModal && appMode !== "dostup" && (
+      {showRequestModal && (
         <RequestSubmittedModal onClose={handleRequestModalClose} />
       )}
     </>

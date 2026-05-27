@@ -23,7 +23,9 @@ class DostupServerConfig(ServerConfig):
       because of the existing ``UserAuth.get_user_id()`` contract.
     """
 
-    app_mode = AppMode.DOSTUP  # type: ignore[attr-defined]
+    # Report OSS to the frontend → standard UI (no custom login page).
+    # DOSTUP auth APIs (/api/v1/auth/*, /api/v1/bot/*) remain fully functional.
+    app_mode = AppMode.OSS  # type: ignore[attr-defined]
     user_auth_class: str = (
         'openhands.app_server.user_auth.dostup.dostup_user_auth.DostupUserAuth'
     )
