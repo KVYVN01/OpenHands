@@ -67,6 +67,38 @@ def _oh_patch_message_tool_call():
 _oh_patch_message_tool_call()
 del _oh_patch_message_tool_call
 
+
+# oh-pro: auto-deploy skills on first import (no setup-skills.sh needed)
+def _oh_setup_skills():
+    """Copy oh-pro skills from repo skills/ → ~/.agents/skills/ on first run."""
+    import shutil
+    from pathlib import Path as _Path
+
+    repo_root = _Path(__file__).resolve().parent.parent
+    src = repo_root / 'skills'
+    dst = _Path.home() / '.agents' / 'skills'
+
+    if not src.is_dir():
+        return  # no oh-pro skills to deploy
+
+    # Check if already deployed (compare count of .md files)
+    src_count = len(list(src.glob('*.md')))
+    dst_count = len(list(dst.glob('*.md'))) if dst.is_dir() else 0
+
+    if dst_count >= src_count:
+        return  # already up to date
+
+    try:
+        dst.mkdir(parents=True, exist_ok=True)
+        for f in src.glob('*.md'):
+            shutil.copy2(f, dst / f.name)
+    except Exception:
+        pass  # silent fail — skills still work from repo dir for settings page
+
+
+_oh_setup_skills()
+del _oh_setup_skills
+
 # Import version information for backward compatibility
 from openhands.app_server.version import __version__, get_version
 
