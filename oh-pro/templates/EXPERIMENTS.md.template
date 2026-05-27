@@ -1,0 +1,13 @@
+# EXPERIMENTS.md
+
+## Experiment template
+
+- id: <YYYYMMDD-short-name>
+- owner: <agent/user>
+- hypothesis: <testable claim>
+- baseline: <metric and command>
+- seed: <integer>
+- data version: <path/hash>
+- command: <exact command>
+- result: <metric>
+- conclusion: <keep/change/rollback>

@@ -1,0 +1,1 @@
+researcher, investigate options for a Python CLI packaging strategy for a small internal tool, then switch to product-manager mode and produce user stories and acceptance criteria. Do not implement code.

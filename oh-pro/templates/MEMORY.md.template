@@ -1,0 +1,12 @@
+# MEMORY.md
+
+Structured memory for this workspace. Keep it concise, factual, and append-only unless compacting.
+
+## Records
+
+### Template
+- date: <ISO>
+- scope: <repo/module/session>
+- decision: <what was decided>
+- evidence: <file, command, test, user instruction>
+- next_action: <what to do next or none>

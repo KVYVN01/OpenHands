@@ -1,0 +1,1 @@
+Validate oh-pro against a future OpenHands image override without editing OpenHands source: update only `.env` or build args, rebuild wrapper, confirm skills/hooks/templates still mount and healthcheck passes. Record any deviations in DEVIATIONS.md.

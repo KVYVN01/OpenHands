@@ -1,0 +1,30 @@
+# Plan: <Task name>
+
+**Created:** <ISO>
+**Status:** draft
+**Owner-skill:** <skill name>
+
+## Goal
+<one sentence>
+
+## Acceptance criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+
+## Steps
+
+### 1. <Step name>
+- **skill:** `<skill>`
+- **risk:** low
+- **input:** <what>
+- **output:** <what>
+- **rollback:** <how>
+
+## Risks
+- (none yet)
+
+## Out of scope
+- (none yet)
+
+## Decisions log
+- <date>: created
