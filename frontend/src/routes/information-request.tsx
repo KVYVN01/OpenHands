@@ -155,9 +155,9 @@ export default function InformationRequest() {
           />
         </div>
 
-        {/* Back Link */}
+        {/* Back Link — the dedicated /login page is gone, point users home */}
         <Link
-          to="/login"
+          to="/"
           aria-label={t(I18nKey.COMMON$BACK)}
           className={cn(
             "px-6 py-2.5 text-sm rounded-sm",

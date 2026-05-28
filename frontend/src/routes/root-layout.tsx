@@ -3,9 +3,7 @@ import {
   useRouteError,
   isRouteErrorResponse,
   Outlet,
-  useNavigate,
   useLocation,
-  useSearchParams,
 } from "react-router";
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
@@ -19,12 +17,9 @@ import { useSettings } from "#/hooks/query/use-settings";
 import { useMigrateUserConsent } from "#/hooks/use-migrate-user-consent";
 import { displaySuccessToast } from "#/utils/custom-toast-handlers";
 import { useIsOnIntermediatePage } from "#/hooks/use-is-on-intermediate-page";
-import { useAutoLogin } from "#/hooks/use-auto-login";
-import { useAuthCallback } from "#/hooks/use-auth-callback";
 import { useReoTracking } from "#/hooks/use-reo-tracking";
 import { useSyncPostHogConsent } from "#/hooks/use-sync-posthog-consent";
 import { useAutoSelectOrganization } from "#/hooks/use-auto-select-organization";
-import { LOCAL_STORAGE_KEYS } from "#/utils/local-storage";
 import { EmailVerificationGuard } from "#/components/features/guards/email-verification-guard";
 import { OnboardingGuard } from "#/components/features/guards/onboarding-guard";
 import { AlertBanner } from "#/components/features/alerts/alert-banner";
@@ -70,9 +65,7 @@ export function ErrorBoundary() {
 
 export default function MainApp() {
   const appTitle = useAppTitle();
-  const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [searchParams] = useSearchParams();
   const isOnIntermediatePage = useIsOnIntermediatePage();
   const { data: settings } = useSettings();
   const { migrateUserConsent } = useMigrateUserConsent();
@@ -82,8 +75,8 @@ export default function MainApp() {
   const {
     data: isAuthed,
     isFetching: isFetchingAuth,
-    isLoading: isAuthLoading,
     isError: isAuthError,
+    isLoading: isAuthLoading,
   } = useIsAuthed();
 
   const [consentFormIsOpen, setConsentFormIsOpen] = React.useState(false);
@@ -92,12 +85,6 @@ export default function MainApp() {
   const { invitationToken, clearInvitation } = useInvitation();
   const { mutate: switchOrganization } = useSwitchOrganization();
   const [showInvitationModal, setShowInvitationModal] = React.useState(false);
-
-  // Auto-login if login method is stored in local storage
-  useAutoLogin();
-
-  // Handle authentication callback and set login method after successful authentication
-  useAuthCallback();
 
   // Initialize Reo.dev tracking in SaaS mode
   useReoTracking();
@@ -165,77 +152,14 @@ export default function MainApp() {
     [clearInvitation, switchOrganization],
   );
 
-  // Function to check if login method exists in local storage
-  const checkLoginMethodExists = React.useCallback(() => {
-    // Only check localStorage if we're in a browser environment
-    if (typeof window !== "undefined" && window.localStorage) {
-      return localStorage.getItem(LOCAL_STORAGE_KEYS.LOGIN_METHOD) !== null;
-    }
-    return false;
-  }, []);
-
-  // State to track if login method exists
-  const [loginMethodExists, setLoginMethodExists] = React.useState(
-    checkLoginMethodExists(),
-  );
-
-  // Listen for storage events to update loginMethodExists when logout happens
-  React.useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === LOCAL_STORAGE_KEYS.LOGIN_METHOD) {
-        setLoginMethodExists(checkLoginMethodExists());
-      }
-    };
-
-    // Also check on window focus, as logout might happen in another tab
-    const handleWindowFocus = () => {
-      setLoginMethodExists(checkLoginMethodExists());
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("focus", handleWindowFocus);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("focus", handleWindowFocus);
-    };
-  }, [checkLoginMethodExists]);
-
-  // Check login method status when auth status changes
-  React.useEffect(() => {
-    // When auth status changes (especially on logout), recheck login method
-    setLoginMethodExists(checkLoginMethodExists());
-  }, [isAuthed, checkLoginMethodExists]);
-
-  // Show loading spinner while config or auth is loading
+  // The dedicated /login page has been removed. We no longer redirect
+  // unauthenticated users to a login screen — SaaS deployments are expected
+  // to terminate authentication at the gateway/IDP before traffic reaches
+  // the React app, and OSS mode never required login in the first place.
+  // We still surface a reauth modal in SaaS mode if the cookie expires.
   const isLoading = config.isLoading || isAuthLoading;
 
-  // Only decide to redirect AFTER loading completes
-  const shouldRedirectToLogin =
-    !isLoading &&
-    !isAuthed &&
-    !isAuthError &&
-    !isOnIntermediatePage &&
-    config.data?.app_mode === "saas" &&
-    !loginMethodExists;
-
-  React.useEffect(() => {
-    if (shouldRedirectToLogin) {
-      // Include search params in returnTo to preserve query string (e.g., user_code for device OAuth)
-      const searchString = searchParams.toString();
-      let fullPath = "";
-      if (pathname !== "/") {
-        fullPath = searchString ? `${pathname}?${searchString}` : pathname;
-      }
-      const loginUrl = fullPath
-        ? `/login?returnTo=${encodeURIComponent(fullPath)}`
-        : "/login";
-      navigate(loginUrl, { replace: true });
-    }
-  }, [shouldRedirectToLogin, pathname, searchParams, navigate]);
-
-  // Show loading spinner while loading OR when about to redirect
-  if (isLoading || shouldRedirectToLogin) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base">
         <LoadingSpinner size="large" />
@@ -248,8 +172,7 @@ export default function MainApp() {
     !isAuthError &&
     !isFetchingAuth &&
     !isOnIntermediatePage &&
-    config.data?.app_mode === "saas" &&
-    loginMethodExists;
+    config.data?.app_mode === "saas";
 
   return (
     <div

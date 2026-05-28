@@ -62,8 +62,9 @@ export function InformationRequestForm({
     clearEnterpriseFormData(requestType);
     onFormDataChange({ name: "", company: "", email: "", message: "" });
 
-    // Navigate to login page with state to show confirmation modal
-    navigate("/login", { state: { showRequestSubmittedModal: true } });
+    // The dedicated /login page no longer exists; return users to the home
+    // page after submitting an enterprise request.
+    navigate("/", { state: { showRequestSubmittedModal: true } });
   };
 
   const isSaas = requestType === "saas";
