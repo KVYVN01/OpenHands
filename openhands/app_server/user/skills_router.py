@@ -13,7 +13,16 @@ router = APIRouter(prefix='/skills', tags=['Skills'], dependencies=get_dependenc
 
 # skills/ is at the repo root, two levels above the openhands package __file__
 GLOBAL_SKILLS_DIR = Path(openhands.__file__).parent.parent / 'skills'
-USER_SKILLS_DIR = Path.home() / '.openhands' / 'microagents'
+
+# User-level skill directories, in the same precedence order the SDK uses in
+# openhands.sdk.skills.skill.USER_SKILLS_DIRS.  We list them ourselves (instead
+# of importing from the SDK) so the UI works even if the SDK changes paths and
+# so we can surface every directory's source label consistently.
+USER_SKILLS_DIRS: tuple[Path, ...] = (
+    Path.home() / '.agents' / 'skills',
+    Path.home() / '.openhands' / 'skills',
+    Path.home() / '.openhands' / 'microagents',
+)
 
 
 class SkillInfo(BaseModel):
@@ -130,11 +139,18 @@ async def search_skills(
     except Exception as e:
         logger.warning(f'Failed to load global skills: {e}')
 
-    # Load user-level skills
-    try:
-        skills.extend(_load_skills_from_dir(USER_SKILLS_DIR, 'user'))
-    except Exception as e:
-        logger.warning(f'Failed to load user skills: {e}')
+    # Load user-level skills from every supported directory.  Earlier entries
+    # take precedence, mirroring openhands.sdk.skills.skill.load_user_skills().
+    seen_user_skill_names: set[str] = set()
+    for user_dir in USER_SKILLS_DIRS:
+        try:
+            for skill in _load_skills_from_dir(user_dir, 'user'):
+                if skill.name in seen_user_skill_names:
+                    continue
+                seen_user_skill_names.add(skill.name)
+                skills.append(skill)
+        except Exception as e:
+            logger.warning(f'Failed to load user skills from {user_dir}: {e}')
 
     # Sort by source (global first), then by name
     skills.sort(key=lambda s: (s.source, s.name))

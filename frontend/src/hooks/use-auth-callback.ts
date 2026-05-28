@@ -42,7 +42,9 @@ export const useAuthCallback = () => {
       searchParams.delete("login_method");
       searchParams.delete("returnTo");
 
-      // Determine where to navigate after authentication
+      // Determine where to navigate after authentication.  The legacy
+      // ``/login`` page no longer exists; we only treat it specially here to
+      // gracefully handle stale ``returnTo`` URLs from before its removal.
       let destination = "/";
       if (returnTo && returnTo !== "/login") {
         destination = returnTo;

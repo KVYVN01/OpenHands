@@ -117,8 +117,8 @@ async def test_skills_search_returns_skills(test_client, tmp_path):
     with (
         patch('openhands.app_server.user.skills_router.GLOBAL_SKILLS_DIR', global_dir),
         patch(
-            'openhands.app_server.user.skills_router.USER_SKILLS_DIR',
-            tmp_path / 'nonexistent',
+            'openhands.app_server.user.skills_router.USER_SKILLS_DIRS',
+            (tmp_path / 'nonexistent',),
         ),
     ):
         response = test_client.get('/api/v1/skills/search')
@@ -157,8 +157,8 @@ async def test_skills_search_handles_missing_dirs(test_client, tmp_path):
             tmp_path / 'no_such_dir',
         ),
         patch(
-            'openhands.app_server.user.skills_router.USER_SKILLS_DIR',
-            tmp_path / 'also_missing',
+            'openhands.app_server.user.skills_router.USER_SKILLS_DIRS',
+            (tmp_path / 'also_missing',),
         ),
     ):
         response = test_client.get('/api/v1/skills/search')
@@ -181,7 +181,7 @@ async def test_skills_search_sorted_by_source_then_name(test_client, tmp_path):
 
     with (
         patch('openhands.app_server.user.skills_router.GLOBAL_SKILLS_DIR', global_dir),
-        patch('openhands.app_server.user.skills_router.USER_SKILLS_DIR', user_dir),
+        patch('openhands.app_server.user.skills_router.USER_SKILLS_DIRS', (user_dir,)),
     ):
         response = test_client.get('/api/v1/skills/search')
 
@@ -210,8 +210,8 @@ async def test_skills_search_pagination(test_client, tmp_path):
     with (
         patch('openhands.app_server.user.skills_router.GLOBAL_SKILLS_DIR', global_dir),
         patch(
-            'openhands.app_server.user.skills_router.USER_SKILLS_DIR',
-            tmp_path / 'nonexistent',
+            'openhands.app_server.user.skills_router.USER_SKILLS_DIRS',
+            (tmp_path / 'nonexistent',),
         ),
     ):
         # First page with limit=2
@@ -267,3 +267,70 @@ def test_global_skills_dir_points_to_repo_root():
         f'Expected skill file not found: {expected_skill}. '
         f'GLOBAL_SKILLS_DIR may be pointing to wrong location.'
     )
+
+
+@pytest.mark.asyncio
+async def test_skills_search_reads_multiple_user_dirs(test_client, tmp_path):
+    """User skills are loaded from every directory in ``USER_SKILLS_DIRS``.
+
+    Regression test for the V1 path being ignored — only ``~/.openhands/microagents``
+    was read previously, so skills placed in ``~/.openhands/skills/`` never surfaced
+    in the Settings UI even though the agent-server happily loaded them.
+    """
+    agents_dir = tmp_path / 'home' / '.agents' / 'skills'
+    v1_dir = tmp_path / 'home' / '.openhands' / 'skills'
+    legacy_dir = tmp_path / 'home' / '.openhands' / 'microagents'
+
+    _write_skill_file(agents_dir, 'agents_skill', skill_type='knowledge')
+    _write_skill_file(v1_dir, 'v1_skill', skill_type='knowledge')
+    _write_skill_file(legacy_dir, 'legacy_skill', skill_type='knowledge')
+
+    with (
+        patch(
+            'openhands.app_server.user.skills_router.GLOBAL_SKILLS_DIR',
+            tmp_path / 'no_global',
+        ),
+        patch(
+            'openhands.app_server.user.skills_router.USER_SKILLS_DIRS',
+            (agents_dir, v1_dir, legacy_dir),
+        ),
+    ):
+        response = test_client.get('/api/v1/skills/search')
+
+    assert response.status_code == 200
+    names = {item['name'] for item in response.json()['items']}
+    assert names == {'agents_skill', 'v1_skill', 'legacy_skill'}
+
+
+@pytest.mark.asyncio
+async def test_skills_search_user_dir_precedence(test_client, tmp_path):
+    """When the same skill name appears in multiple user dirs, the first one wins.
+
+    The first directory listed in ``USER_SKILLS_DIRS`` (typically
+    ``~/.agents/skills``) has the highest precedence — matching the SDK's
+    ``load_user_skills`` ordering.
+    """
+    first_dir = tmp_path / 'home' / '.agents' / 'skills'
+    second_dir = tmp_path / 'home' / '.openhands' / 'microagents'
+
+    _write_skill_file(first_dir, 'overlap', skill_type='repo', triggers=['from-first'])
+    _write_skill_file(
+        second_dir, 'overlap', skill_type='knowledge', triggers=['from-second']
+    )
+
+    with (
+        patch(
+            'openhands.app_server.user.skills_router.GLOBAL_SKILLS_DIR',
+            tmp_path / 'no_global',
+        ),
+        patch(
+            'openhands.app_server.user.skills_router.USER_SKILLS_DIRS',
+            (first_dir, second_dir),
+        ),
+    ):
+        response = test_client.get('/api/v1/skills/search')
+
+    items = response.json()['items']
+    assert [item['name'] for item in items] == ['overlap']
+    assert items[0]['triggers'] == ['from-first']
+    assert items[0]['type'] == 'repo'

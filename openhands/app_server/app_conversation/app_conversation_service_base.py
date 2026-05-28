@@ -40,7 +40,7 @@ from openhands.sdk.security import (
     NeverConfirm,
     SecurityAnalyzerBase,
 )
-from openhands.sdk.skills import Skill
+from openhands.sdk.skills import Skill, load_skills_from_dir
 from openhands.sdk.workspace.remote.async_remote_workspace import AsyncRemoteWorkspace
 
 _logger = logging.getLogger(__name__)
@@ -80,6 +80,95 @@ def get_project_dir(
         repo_name = selected_repository.split('/')[-1]
         return f'{working_dir}/{repo_name}'
     return working_dir
+
+
+def _global_skills_dir() -> Path:
+    """The repo-bundled skills directory shipped with this OpenHands install.
+
+    Located at ``OpenHands/skills`` (two levels above ``openhands/__init__.py``).
+    The directory contains markdown skills that are visible in the Settings UI
+    via ``/api/v1/skills/search`` but, by default, never reach the agent-server
+    (which runs in a separate sandbox).  We surface them here so the UI list
+    and the agent context stay in sync.
+    """
+    import openhands  # local import to avoid cycle when this module is imported early
+
+    return Path(openhands.__file__).resolve().parent.parent / 'skills'
+
+
+def _user_skill_dirs() -> tuple[Path, ...]:
+    """User-level skill directories reachable from the host, in priority order.
+
+    Mirrors ``openhands.sdk.skills.skill.USER_SKILLS_DIRS`` but resolves
+    ``Path.home()`` at call time, so tests can monkeypatch the home dir
+    without re-importing the SDK.
+    """
+    home = Path.home()
+    return (
+        home / '.agents' / 'skills',
+        home / '.openhands' / 'skills',
+        home / '.openhands' / 'microagents',
+    )
+
+
+def _collect_skills_from_dir(skill_dir: Path) -> list[Skill]:
+    """Run ``load_skills_from_dir`` and flatten the three buckets it returns."""
+    repo_skills, knowledge_skills, agent_skills = load_skills_from_dir(skill_dir)
+    flattened: list[Skill] = []
+    for bucket in (repo_skills, knowledge_skills, agent_skills):
+        flattened.extend(bucket.values())
+    return flattened
+
+
+def _load_host_side_skills() -> list[Skill]:
+    """Load skills from host paths reachable by the app-server process.
+
+    Sources (later overrides earlier on duplicate names):
+
+    - ``OpenHands/skills/`` — the repo-bundled "global" skills (the same list
+      the UI sees in ``/api/v1/skills/search``).
+    - ``~/.agents/skills/``, ``~/.openhands/skills/``, ``~/.openhands/microagents/``
+      — the host user's personal skills, in the same priority order the SDK
+      uses (earlier dir wins on name collision).
+
+    The agent-server lives in a different process / container and only sees
+    skills inside its sandbox.  Without this bridge, the user's host-side
+    skills appear in the Settings UI but never make it into the agent's
+    context, and the per-skill enable/disable toggle silently does nothing.
+    """
+    skills_by_name: dict[str, Skill] = {}
+
+    global_dir = _global_skills_dir()
+    if global_dir.is_dir():
+        try:
+            for skill in _collect_skills_from_dir(global_dir):
+                skills_by_name[skill.name] = skill
+        except Exception as exc:  # noqa: BLE001 - never let skill loading break a run
+            _logger.warning(
+                'Failed to load host-side global skills from %s: %s',
+                global_dir,
+                exc,
+            )
+
+    # User dirs are walked in priority order; the first occurrence of a name
+    # wins so ``~/.agents/skills`` overrides ``~/.openhands/microagents``.
+    user_seen: set[str] = set()
+    for user_dir in _user_skill_dirs():
+        if not user_dir.is_dir():
+            continue
+        try:
+            for skill in _collect_skills_from_dir(user_dir):
+                if skill.name in user_seen:
+                    continue
+                user_seen.add(skill.name)
+                # User skills override the repo-bundled ones with the same name.
+                skills_by_name[skill.name] = skill
+        except Exception as exc:  # noqa: BLE001
+            _logger.warning(
+                'Failed to load host-side user skills from %s: %s', user_dir, exc
+            )
+
+    return list(skills_by_name.values())
 
 
 @dataclass
@@ -231,6 +320,22 @@ class AppConversationServiceBase(AppConversationService, ABC):
             project_dir,
             agent_server_url,
         )
+
+        # Bridge: merge host-side local skills so what the UI shows in
+        # /api/v1/skills/search actually reaches the agent context.  The
+        # agent-server runs in a separate process / container and does not
+        # see the host's `OpenHands/skills/` directory or the host user's
+        # `~/.openhands/skills/` and `~/.openhands/microagents/` directories.
+        host_skills = _load_host_side_skills()
+        if host_skills:
+            _logger.info(
+                'Merging %d host-side skills into agent context: %s',
+                len(host_skills),
+                [s.name for s in host_skills],
+            )
+            # Later lists override earlier on duplicate names; host wins so the
+            # user's local edits take precedence over the bundled marketplace.
+            all_skills = self._merge_skills([all_skills, host_skills])
 
         # Filter out disabled skills
         if disabled_skills:

@@ -6,7 +6,10 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
-  route("login", "routes/login.tsx"),
+  // The dedicated /login page has been removed.  OpenHands now relies on the
+  // OSS auth flow (where `useIsAuthed` always returns true) and any SaaS
+  // deployment is expected to terminate authentication at the gateway/IDP
+  // (Keycloak, OAuth proxy, etc.) before traffic reaches the React app.
   route("onboarding", "routes/onboarding-form.tsx"),
   route("information-request", "routes/information-request.tsx"),
   layout("routes/root-layout.tsx", [

@@ -98,11 +98,13 @@ describe("InformationRequest", () => {
     expect(screen.getByText("COMMON$BACK")).toBeInTheDocument();
   });
 
-  it("should have back link pointing to /login", () => {
+  it("should have back link pointing to home", () => {
+    // The dedicated /login route was removed; the back link now sends
+    // users home instead.
     renderWithRouter();
 
     const backLink = screen.getByText("COMMON$BACK");
-    expect(backLink).toHaveAttribute("href", "/login");
+    expect(backLink).toHaveAttribute("href", "/");
   });
 
   it("should show SaaS form when SaaS Learn More is clicked", async () => {

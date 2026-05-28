@@ -35,14 +35,17 @@ describe("InformationRequestForm", () => {
   });
 
   const renderWithRouter = (props = defaultProps) => {
+    // The dedicated /login page was removed; the form now sends users to the
+    // home route, so we mount the form on a sub-path and assert against the
+    // home-page placeholder after submission.
     const Stub = createRoutesStub([
       {
         path: "/",
-        Component: () => <StatefulForm {...props} />,
+        Component: () => <div data-testid="home-page" />,
       },
       {
-        path: "/login",
-        Component: () => <div data-testid="login-page" />,
+        path: "/form",
+        Component: () => <StatefulForm {...props} />,
       },
       {
         path: "/information-request",
@@ -50,7 +53,7 @@ describe("InformationRequestForm", () => {
       },
     ]);
 
-    return render(<Stub initialEntries={["/"]} />);
+    return render(<Stub initialEntries={["/form"]} />);
   };
 
   it("should render the form", () => {
@@ -209,12 +212,12 @@ describe("InformationRequestForm", () => {
       });
       await user.click(submitButton);
 
-      // Should stay on form page, not navigate to login
+      // Should stay on form page, not navigate home
       expect(screen.getByTestId("information-request-form")).toBeInTheDocument();
-      expect(screen.queryByTestId("login-page")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("home-page")).not.toBeInTheDocument();
     });
 
-    it("should navigate to login page when form is submitted with all fields filled", async () => {
+    it("should navigate home when form is submitted with all fields filled", async () => {
       const user = userEvent.setup();
       renderWithRouter();
 
@@ -228,8 +231,8 @@ describe("InformationRequestForm", () => {
       });
       await user.click(submitButton);
 
-      // Should navigate to login page
-      expect(screen.getByTestId("login-page")).toBeInTheDocument();
+      // Should navigate home (the /login page was removed)
+      expect(screen.getByTestId("home-page")).toBeInTheDocument();
     });
 
     it("should have valid aria-invalid state when field has value", async () => {
@@ -257,9 +260,9 @@ describe("InformationRequestForm", () => {
       });
       await user.click(submitButton);
 
-      // Should stay on form page, not navigate to login
+      // Should stay on form page, not navigate home
       expect(screen.getByTestId("information-request-form")).toBeInTheDocument();
-      expect(screen.queryByTestId("login-page")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("home-page")).not.toBeInTheDocument();
     });
   });
 
@@ -282,8 +285,8 @@ describe("InformationRequestForm", () => {
       await user.click(submitButton);
       await user.click(submitButton);
 
-      // Should navigate to login page
-      expect(screen.getByTestId("login-page")).toBeInTheDocument();
+      // Should navigate home (the /login page was removed)
+      expect(screen.getByTestId("home-page")).toBeInTheDocument();
     });
   });
 });
