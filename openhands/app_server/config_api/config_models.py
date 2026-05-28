@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 class AppMode(Enum):
     OPENHANDS = 'oss'
     SAAS = 'saas'
+    DOSTUP = 'dostup'
 
 
 class LLMModel(BaseModel):

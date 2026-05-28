@@ -33,15 +33,13 @@ export const JSON_VIEW_THEME = {
 
 export const DOCUMENTATION_URL = {
   MICROAGENTS: {
-    MICROAGENTS_OVERVIEW:
-      "https://docs.all-hands.dev/usage/prompting/microagents-overview",
-    ORGANIZATION_AND_USER_MICROAGENTS:
-      "https://docs.all-hands.dev/usage/prompting/microagents-org",
+    MICROAGENTS_OVERVIEW: "#",
+    ORGANIZATION_AND_USER_MICROAGENTS: "#",
   },
 };
 
 export const PRODUCT_URL = {
-  PRODUCTION: "https://app.all-hands.dev",
+  PRODUCTION: "#",
 };
 
 export const SETTINGS_FORM = {

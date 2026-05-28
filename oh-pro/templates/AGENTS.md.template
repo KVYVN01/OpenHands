@@ -1,0 +1,19 @@
+# AGENTS.md — oh-pro project conventions
+
+## Core workflow
+
+1. Read `PLAN.md` for non-trivial work.
+2. Use `plan-orchestrator` before multi-file changes, refactors, migrations, or security-sensitive work.
+3. Use `scripts/claim.sh <files>` before writing files.
+4. Run `scripts/verify.sh .` after writes to prove claimed changes exist and no silent drift happened.
+5. Append durable decisions to `MEMORY.md` using structured memory fields.
+
+## Strict Write Discipline
+
+- Never claim a file was written until it exists and hashes changed.
+- If `verify.sh` reports drift or hallucination, stop and correct the record before continuing.
+- Keep logs factual and append-only.
+
+## Planner workflow
+
+For non-trivial tasks create/update `PLAN.md` with goal, acceptance criteria, skill-bound steps, risk, rollback, out-of-scope, and decisions log. Each plan step maps to one task-list item.

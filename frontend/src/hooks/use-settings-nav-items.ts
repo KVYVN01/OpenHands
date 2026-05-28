@@ -2,6 +2,7 @@ import { useConfig } from "#/hooks/query/use-config";
 import {
   SAAS_NAV_ITEMS,
   OSS_NAV_ITEMS,
+  DOSTUP_NAV_ITEMS,
   SettingsNavItem,
   SettingsNavSection,
 } from "#/constants/settings-nav";
@@ -61,7 +62,14 @@ export function useSettingsNavItems(): SettingsNavRenderedItem[] {
       )?.display_name ?? "ACP Agent")
     : null;
 
-  let items = isSaasMode ? [...SAAS_NAV_ITEMS] : [...OSS_NAV_ITEMS];
+  const isDostupMode = config?.app_mode === "dostup";
+
+  const getBaseNavItems = () => {
+    if (isSaasMode) return [...SAAS_NAV_ITEMS];
+    if (isDostupMode) return [...DOSTUP_NAV_ITEMS];
+    return [...OSS_NAV_ITEMS];
+  };
+  let items = getBaseNavItems();
 
   // First apply feature flag-based hiding
   items = items.filter((item) => !isSettingsPageHidden(item.to, featureFlags));

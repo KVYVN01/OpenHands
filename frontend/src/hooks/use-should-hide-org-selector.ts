@@ -6,8 +6,8 @@ export function useShouldHideOrgSelector() {
   const { data } = useOrganizations();
   const organizations = data?.organizations;
 
-  // Always hide in OSS mode - organizations are a SaaS feature
-  if (config?.app_mode === "oss") {
+  // Always hide in OSS and DOSTUP modes - organizations are a SaaS feature
+  if (config?.app_mode !== "saas") {
     return true;
   }
 

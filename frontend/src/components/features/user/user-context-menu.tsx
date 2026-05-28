@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid -- placeholder anchors after URL scrub for DOSTUP_CRS */
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { IoLogOutOutline, IoPersonAddOutline } from "react-icons/io5";
@@ -145,7 +146,7 @@ export function UserContextMenu({
           <SettingsNavDivider className="my-1.5" />
 
           <a
-            href="https://docs.openhands.dev"
+            href="#"
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}

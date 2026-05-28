@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid -- placeholder anchors after URL scrub for DOSTUP_CRS */
 import { Trans, useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 
@@ -15,7 +16,7 @@ export function BitbucketDCTokenHelpAnchor() {
           <a
             key="bitbucket-dc-token-help-anchor-link"
             aria-label={t(I18nKey.GIT$BITBUCKET_DC_TOKEN_HELP_LINK)}
-            href="https://confluence.atlassian.com/bitbucketserver/http-access-tokens-939515499.html"
+            href="#"
             target="_blank"
             className="underline underline-offset-2"
             rel="noopener noreferrer"

@@ -35,11 +35,13 @@ export const useGitUser = () => {
     }
   }, [user.data]);
 
-  // In saas mode, a 401 means that the integration tokens need to be
-  // refreshed. Since this happens at login, we log out.
-  // In oss mode, skip auto-logout since there's no token refresh mechanism
+  // In saas or dostup mode, a 401 means the session has expired.
+  // In oss mode, skip auto-logout since there's no token refresh mechanism.
   React.useEffect(() => {
-    if (user?.error?.response?.status === 401 && config?.app_mode === "saas") {
+    if (
+      user?.error?.response?.status === 401 &&
+      (config?.app_mode === "saas" || config?.app_mode === "dostup")
+    ) {
       logout.mutate();
     }
   }, [user.status, config?.app_mode]);

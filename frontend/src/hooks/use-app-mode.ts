@@ -7,6 +7,7 @@ import { useConfig } from "#/hooks/query/use-config";
  * App Mode (app_mode):
  * - "oss": Open source version running locally/self-hosted
  * - "saas": All-Hands managed SaaS version
+ * - "dostup": DOSTUP_CRS local multi-user (email/password + JWT cookie)
  *
  * Deployment Mode (deployment_mode):
  * - "cloud": Enterprise customers running on All-Hands managed infrastructure (*.all-hands.dev, *.openhands.ai)
@@ -25,6 +26,7 @@ export function useAppMode() {
       // App Mode checks
       isOss: appMode === "oss",
       isSaas: appMode === "saas",
+      isDostup: appMode === "dostup",
 
       // Deployment Mode checks
       isCloud: deploymentMode === "cloud",

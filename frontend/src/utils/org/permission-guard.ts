@@ -50,8 +50,8 @@ export const createPermissionGuard =
     // Get config to check app_mode
     const config = await getConfig();
 
-    // In OSS mode, skip permission checks - all settings are accessible
-    if (config?.app_mode === "oss") {
+    // In OSS and DOSTUP modes, skip org permission checks - all settings are accessible
+    if (config?.app_mode === "oss" || config?.app_mode === "dostup") {
       return null;
     }
 

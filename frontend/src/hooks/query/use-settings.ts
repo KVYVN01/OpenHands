@@ -128,7 +128,8 @@ export const useSettings = (scope: SettingsScope = "personal") => {
   const { organizationId } = useSelectedOrganizationId();
   const { data: config } = useConfig();
 
-  const isOss = config?.app_mode === "oss";
+  const isLocalMode =
+    config?.app_mode === "oss" || config?.app_mode === "dostup";
 
   const query = useQuery({
     queryKey: SETTINGS_QUERY_KEYS.byScope(scope, organizationId),
@@ -140,7 +141,7 @@ export const useSettings = (scope: SettingsScope = "personal") => {
     enabled:
       !isOnIntermediatePage &&
       !!userIsAuthenticated &&
-      (isOss || !!organizationId),
+      (isLocalMode || !!organizationId),
     meta: {
       disableToast: true,
     },

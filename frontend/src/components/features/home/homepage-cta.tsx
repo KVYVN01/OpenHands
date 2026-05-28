@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid -- placeholder anchors after URL scrub for DOSTUP_CRS */
 import { useTranslation } from "react-i18next";
 import { Dispatch, SetStateAction } from "react";
 import { useClientAnalytics } from "#/hooks/use-client-analytics";
@@ -56,7 +57,7 @@ export function HomepageCTA({ setShouldShowCTA }: HomepageCTAProps) {
 
         <a
           data-testid="homepage-cta-learn-more"
-          href="https://openhands.dev/enterprise/"
+          href="#"
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleLearnMoreClick}

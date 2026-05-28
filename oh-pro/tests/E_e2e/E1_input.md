@@ -1,0 +1,1 @@
+Use oh-pro workflow. Build a minimal Python FastAPI ML scoring service in this workspace. Requirements: fixed seed, baseline metric, `/predict` endpoint, pytest coverage, EXPERIMENTS.md with seed/baseline/data hash/command/result. Use PLAN.md because this is multi-file work.

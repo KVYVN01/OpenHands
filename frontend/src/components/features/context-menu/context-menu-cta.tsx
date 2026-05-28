@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid -- placeholder anchors after URL scrub for DOSTUP_CRS */
 import { useTranslation } from "react-i18next";
 import { useClientAnalytics } from "#/hooks/use-client-analytics";
 import { cn } from "#/utils/utils";
@@ -44,7 +45,7 @@ export function ContextMenuCTA() {
 
         <div className="flex mt-auto">
           <a
-            href="https://openhands.dev/enterprise/"
+            href="#"
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleLearnMoreClick}

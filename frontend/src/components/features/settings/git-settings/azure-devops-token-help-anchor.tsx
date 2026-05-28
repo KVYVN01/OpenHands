@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid -- placeholder anchors after URL scrub for DOSTUP_CRS */
 import { useTranslation } from "react-i18next";
 import { I18nKey } from "#/i18n/declaration";
 
@@ -7,7 +8,7 @@ export function AzureDevOpsTokenHelpAnchor() {
   return (
     <p data-testid="azure-devops-token-help-anchor" className="text-xs">
       <a
-        href="https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate"
+        href="#"
         target="_blank"
         className="underline underline-offset-2"
         rel="noopener noreferrer"

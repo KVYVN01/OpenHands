@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import uuid
 from collections import defaultdict
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
@@ -72,6 +73,38 @@ class CacheControlMiddleware(BaseHTTPMiddleware):
         return response
 
 
+class RequestIdMiddleware(BaseHTTPMiddleware):
+    """Inject ``X-Request-Id`` into every request/response.
+
+    If the client already sent the header, it is preserved (forwarded).
+    Otherwise a UUID-4 is generated. The id is stashed on
+    ``request.state.request_id`` for use by downstream handlers.
+    """
+
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        request_id = request.headers.get('X-Request-Id') or uuid.uuid4().hex
+        request.state.request_id = request_id
+        response = await call_next(request)
+        response.headers['X-Request-Id'] = request_id
+        return response
+
+
+# ---------------------------------------------------------------------------
+# Rate limiting (per-user when authenticated, per-IP fallback)
+# ---------------------------------------------------------------------------
+
+
+def _rate_limit_key(request: Request) -> str:
+    """Return ``user_id`` if the request is authenticated, else client IP."""
+    user_id = getattr(getattr(request, 'state', None), 'rate_limit_user_id', None)
+    if user_id:
+        return f'user:{user_id}'
+    host = request.client.host if request.client else '0.0.0.0'
+    return f'ip:{host}'
+
+
 class InMemoryRateLimiter:
     history: dict[str, list[datetime]]
     requests: int
@@ -91,7 +124,7 @@ class InMemoryRateLimiter:
         self.history[key] = [ts for ts in self.history[key] if ts > cutoff]
 
     async def __call__(self, request: Request) -> bool:
-        key = request.client.host
+        key = _rate_limit_key(request)
         now = datetime.now()
 
         self._clean_old_requests(key)
@@ -120,11 +153,24 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         if not self.is_rate_limited_request(request):
             return await call_next(request)
+
+        # Attempt lightweight user-id extraction for per-user keying.
+        self._try_set_user_id(request)
+
         ok = await self.rate_limiter(request)
         if not ok:
+            request_id = getattr(getattr(request, 'state', None), 'request_id', None)
+            body: dict = {
+                'error': {
+                    'code': 'rate_limited',
+                    'message': 'Too many requests. Please retry later.',
+                }
+            }
+            if request_id:
+                body['error']['request_id'] = request_id
             return JSONResponse(
                 status_code=429,
-                content={'message': 'Too many requests'},
+                content=body,
                 headers={'Retry-After': '1'},
             )
         return await call_next(request)
@@ -132,5 +178,23 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def is_rate_limited_request(self, request: StarletteRequest) -> bool:
         if request.url.path.startswith('/assets'):
             return False
-        # Put Other non rate limited checks here
         return True
+
+    @staticmethod
+    def _try_set_user_id(request: Request) -> None:
+        """Best-effort extraction of an authenticated user id for keying.
+
+        We peek at the cookie / API-key header without doing a full auth
+        round-trip — the goal is just to differentiate users for rate-limit
+        bucketing, not to enforce auth (that is the endpoint's job).
+        """
+        try:
+            from openhands.app_server.user_auth.dostup.security import decode_token
+
+            cookie = request.cookies.get('dostup_session')
+            if cookie:
+                payload = decode_token(cookie)
+                if payload and 'sub' in payload:
+                    request.state.rate_limit_user_id = payload['sub']
+        except Exception:  # noqa: BLE001
+            pass

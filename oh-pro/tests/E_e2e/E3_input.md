@@ -1,0 +1,1 @@
+Run a long-session simulation with 15 small tasks: create numbered notes, update PLAN.md after every five tasks, append worklog records, then compact memory when threshold is exceeded. Do not store secrets.

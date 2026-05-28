@@ -17,12 +17,13 @@ export const useGetSecrets = () => {
   const { data: isAuthed } = useIsAuthed();
   const { organizationId } = useSelectedOrganizationId();
 
-  const isOss = config?.app_mode === "oss";
+  const isLocalMode =
+    config?.app_mode === "oss" || config?.app_mode === "dostup";
 
   return useQuery({
     queryKey: ["secrets", organizationId],
     queryFn: SecretsService.getSecrets,
-    enabled: isOss || (isAuthed && !!organizationId),
+    enabled: isLocalMode || (isAuthed && !!organizationId),
   });
 };
 
@@ -41,8 +42,9 @@ export const useSearchSecrets = (options: UseSearchSecretsOptions = {}) => {
   const { data: isAuthed } = useIsAuthed();
   const { organizationId } = useSelectedOrganizationId();
 
-  const isOss = config?.app_mode === "oss";
-  const isEnabled = enabled && (isOss || (isAuthed && !!organizationId));
+  const isLocalMode =
+    config?.app_mode === "oss" || config?.app_mode === "dostup";
+  const isEnabled = enabled && (isLocalMode || (isAuthed && !!organizationId));
 
   const query = useInfiniteQuery<
     CustomSecretPage,

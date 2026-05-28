@@ -114,3 +114,24 @@ export function getFirstAvailablePath(
 
   return firstAvailable?.path ?? null;
 }
+
+export function getFirstAvailablePathForMode(
+  appMode: string | undefined,
+  featureFlags: WebClientFeatureFlags | undefined,
+): string | null {
+  if (appMode === "dostup") {
+    const dostupFallbackOrder = [
+      { path: "/settings", hidden: !!featureFlags?.hide_llm_settings },
+      { path: "/settings/api-keys", hidden: false },
+      { path: "/settings/secrets", hidden: false },
+      { path: "/settings/mcp", hidden: false },
+      {
+        path: "/settings/integrations",
+        hidden: !!featureFlags?.hide_integrations_page,
+      },
+      { path: "/settings/app", hidden: false },
+    ];
+    return dostupFallbackOrder.find((item) => !item.hidden)?.path ?? null;
+  }
+  return getFirstAvailablePath(appMode === "saas", featureFlags);
+}

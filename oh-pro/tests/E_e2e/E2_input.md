@@ -1,0 +1,1 @@
+Use oh-pro Strict Write Discipline. Unpack E2_legacy_project.tar.gz, reproduce the failing calculator test, fix the bug without changing tests, claim files before writing, verify after writing, and record the correction in MEMORY.md.

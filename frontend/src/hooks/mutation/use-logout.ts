@@ -23,6 +23,15 @@ export const useLogout = () => {
         clearLoginData();
       }
 
+      // Clear DOSTUP session hint from sessionStorage
+      if (config?.app_mode === "dostup") {
+        try {
+          window.sessionStorage?.removeItem("dostup:last-user");
+        } catch {
+          // ignore storage errors
+        }
+      }
+
       posthog.reset();
 
       // Refresh the page after all logout logic is completed

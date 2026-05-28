@@ -1,0 +1,57 @@
+services:
+  openhands-pro:
+    build:
+      context: .
+      dockerfile: Dockerfile.pro
+      args:
+        OH_VERSION: ${OH_VERSION:-1.7.0}
+        OH_BASE_IMAGE: ${OH_BASE_IMAGE:-ghcr.io/openhands/openhands}
+    image: openhands-pro:v1.0.0
+    container_name: openhands-pro
+    environment:
+      - AGENT_SERVER_IMAGE_REPOSITORY=${AGENT_SERVER_IMAGE_REPOSITORY:-ghcr.io/openhands/agent-server}
+      - AGENT_SERVER_IMAGE_TAG=${AGENT_SERVER_IMAGE_TAG:-1.7.0-python}
+      - WORKSPACE_MOUNT_PATH=${WORKSPACE_BASE:-$PWD/workspace}
+      - SWD_MODE=${SWD_MODE:-strict}
+      - MEMORY_THRESHOLD_LINES=${MEMORY_THRESHOLD_LINES:-500}
+      - MEMORY_KEEP_RECENT=${MEMORY_KEEP_RECENT:-50}
+      - COMPACT_MODEL=${COMPACT_MODEL:-claude-haiku-4-5-20251001}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-anthropic/claude-sonnet-4-5}
+    ports:
+      - "${OPENHANDS_PORT:-3000}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.openhands:/.openhands
+      - ~/.openhands-state:/.openhands-state
+      - ${WORKSPACE_BASE:-$PWD/workspace}:/opt/workspace_base
+      - ./skills:/opt/oh-pro/skills:ro
+      - ./skills:/home/openhands/.agents/skills:ro
+      - ./oh-pro/scripts:/opt/oh-pro/scripts:ro
+      - ./oh-pro/hooks:/opt/oh-pro/hooks:ro
+      - ./oh-pro/templates:/opt/oh-pro/templates:ro
+    mem_limit: 8g
+    cpus: 4
+    healthcheck:
+      test: ["CMD", "oh-healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    stdin_open: true
+    tty: true
+
+  memory-compactor:
+    image: alpine:3.20
+    profiles: ["memory-sidecar"]
+    environment:
+      - MEMORY_THRESHOLD_LINES=${MEMORY_THRESHOLD_LINES:-500}
+      - MEMORY_KEEP_RECENT=${MEMORY_KEEP_RECENT:-50}
+    volumes:
+      - ~/.openhands-state:/.openhands-state
+      - ./oh-pro/scripts:/opt/oh-pro/scripts:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command: "while true; do /opt/oh-pro/scripts/compact-worklog.sh || true; sleep 300; done"
